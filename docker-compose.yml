@@ -1,0 +1,12 @@
+services:
+
+  nodejs:
+    image: keystone-nodejs:latest
+    build:
+      context: ./dev/docker/nodejs
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - 3000:3000
+
