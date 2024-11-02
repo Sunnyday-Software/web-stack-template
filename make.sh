@@ -1,1 +1,0 @@
-docker run --rm debian:bookworm-slim  make $@
