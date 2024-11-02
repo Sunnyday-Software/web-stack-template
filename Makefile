@@ -20,3 +20,7 @@ init:
 run:
 	[ -f dev/scripts/run-keystone-project.sh ] && \
 	docker compose run --rm --no-deps nodejs dev/scripts/run-keystone-project.sh
+
+config:
+	docker compose config
+	docker ps

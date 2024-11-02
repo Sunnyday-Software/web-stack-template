@@ -1,4 +1,6 @@
+# Application's git exclusions
 /application/keystone/core/
+/.npm-cache/
 
 ### Node template
 # Logs
@@ -210,5 +212,6 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
+
 
 

@@ -2,6 +2,7 @@
 set -e
 
 export keystone_version="latest"
+export keystone_path="/app/application/keystone/core"
 
 export d_npm="docker compose run --rm --no-deps nodejs npm"
 
