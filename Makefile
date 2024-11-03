@@ -19,7 +19,7 @@ HELP_TARGETS += "\n help			- Mostra questo messaggio"
 HELP_TARGETS += "\n init     		- Inizializza il progetto keystone"
 HELP_TARGETS += "\n up      		- Avvia il progetto "
 HELP_TARGETS += "\n down      		- Ferma il progetto "
-HELP_TARGETS += "\n reset      		- Ripulisce il progetto cancellando tutto quello che non è in git"
+HELP_TARGETS += "\n hard-reset 		- Ripulisce il progetto cancellando tutto quello che non è in git (db compreso)"
 HELP_TARGETS += "\n docker-config	- Stampa la configurazione di docker compose"
 
 # Target predefinito
@@ -43,7 +43,7 @@ up:
 down:
 	docker compose down -v --remove-orphans
 
-reset:
+hard-reset:
 	git reset --hard
 	git clean -dfx -e \!.idea
 
