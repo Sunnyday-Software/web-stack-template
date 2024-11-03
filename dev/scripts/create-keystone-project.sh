@@ -12,6 +12,7 @@ mkdir -p $(dirname "${keystone_path}")
 if [ -d "${keystone_path}" ]; then
   echo "La cartella ${keystone_path} esiste perciò non invoco npm create app"
 else
+  echo "npm create app"
   npm create keystone-app@${keystone_version} --yes ${keystone_path}
 fi
 
