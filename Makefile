@@ -45,6 +45,7 @@ down:
 
 reset:
 	git reset --hard
+	git clean -dfx -e \!.idea
 
 docker-config:
 	docker compose config
