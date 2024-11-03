@@ -12,6 +12,7 @@ endef
 $(eval $(call CALC_MD5))
 
 $(shell find ./dev/scripts -type f -name "*.sh" -exec chmod +x {} +)
+$(shell find ./dev/scripts -type f -name "*.sh" -exec dos2unix {} +)
 
 # Definire una variabile di aiuto che elenca i target e le loro descrizioni
 HELP_TARGETS = "\n Available tasks:\n"

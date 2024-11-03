@@ -7,6 +7,7 @@ RUN apt-get update -y; \
     openssl \
     jq \
     rsync \
+    dos2unix \
     ;
 
 ## Update npm

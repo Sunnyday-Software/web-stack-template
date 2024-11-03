@@ -7,6 +7,7 @@ RUN apt-get update -y; \
     openssl \
     ca-certificates \
     curl \
+    dos2unix \
     ; \
     rm -rf /var/lib/apt/lists/* \
     ;
