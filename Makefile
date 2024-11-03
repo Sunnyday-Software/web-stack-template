@@ -34,9 +34,8 @@ init:
 	[ -f dev/scripts/create-keystone-project.sh ] && \
 	docker compose run --rm --no-deps nodejs dev/scripts/create-keystone-project.sh
 
-run:
-	[ -f dev/scripts/run-keystone-project.sh ] && \
-	docker compose run --rm --no-deps nodejs dev/scripts/run-keystone-project.sh
+bash:
+	docker compose run --rm --no-deps nodejs bash
 
 up:
 	docker compose up -d nodejs pgadmin
