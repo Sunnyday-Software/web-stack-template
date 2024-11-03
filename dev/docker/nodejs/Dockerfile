@@ -6,6 +6,7 @@ RUN apt-get update -y; \
     nodejs npm \
     openssl \
     jq \
+    rsync \
     ;
 
 ## Update npm

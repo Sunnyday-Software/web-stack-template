@@ -13,6 +13,22 @@ $(eval $(call CALC_MD5))
 
 $(shell find ./dev/scripts -type f -name "*.sh" -exec chmod +x {} +)
 
+# Definire una variabile di aiuto che elenca i target e le loro descrizioni
+HELP_TARGETS = "\n Available tasks:\n"
+HELP_TARGETS += "\n help			- Mostra questo messaggio"
+HELP_TARGETS += "\n init     		- Inizializza il progetto keystone"
+HELP_TARGETS += "\n up      		- Avvia il progetto "
+HELP_TARGETS += "\n down      		- Ferma il progetto "
+HELP_TARGETS += "\n reset      		- Ripulisce il progetto cancellando tutto quello che non è in git"
+HELP_TARGETS += "\n docker-config	- Stampa la configurazione di docker compose"
+
+# Target predefinito
+.DEFAULT_GOAL := help
+
+# Target che stampa l'help
+help:
+	@echo $(HELP_TARGETS)
+
 init:
 	[ -f dev/scripts/create-keystone-project.sh ] && \
 	docker compose run --rm --no-deps nodejs dev/scripts/create-keystone-project.sh
@@ -21,6 +37,14 @@ run:
 	[ -f dev/scripts/run-keystone-project.sh ] && \
 	docker compose run --rm --no-deps nodejs dev/scripts/run-keystone-project.sh
 
-config:
+up:
+	docker compose up -d nodejs pgadmin
+
+down:
+	docker compose down -v --remove-orphans
+
+reset:
+	git reset --hard
+
+docker-config:
 	docker compose config
-	docker ps

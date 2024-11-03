@@ -1,3 +1,4 @@
+name: keystone
 services:
 
   make:
@@ -18,4 +19,37 @@ services:
       - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
     environment:
       - HOST=0.0.0.0
+    ports:
+      - "3000:3000"
+    command:
+      - "/app/dev/scripts/run-keystone-project.sh"
+    depends_on:
+      - postgres
 
+  postgres:
+    image: keystone-postgres:${MD5_POSTGRES}
+    build:
+      context: ./dev/docker/postgres
+      dockerfile: Dockerfile
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - ${HOST_PROJECT_PATH}/.runtime/pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: "dpage/pgadmin4:latest"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "info@sunnyday.software"
+      PGADMIN_DEFAULT_PASSWORD: "password123"
+    volumes:
+      - ${HOST_PROJECT_PATH}/.runtime/pgadmin:/var/lib/pgadmin
+      - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/servers.json:/pgadmin4/servers.json
+      - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/pgpassfile:/pgpassfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres

@@ -1,6 +1,7 @@
 # Application's git exclusions
 /application/keystone/core/
 /.npm-cache/
+/.runtime/
 
 ### Node template
 # Logs

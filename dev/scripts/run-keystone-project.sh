@@ -3,6 +3,8 @@
 #
 set -e
 
+echo "script $0"
+
 source "$(dirname "$0")/env.sh"
 
 check_container;
