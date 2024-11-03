@@ -7,6 +7,8 @@ source "$(dirname "$0")/env.sh"
 
 check_container;
 
+echo "node version $(node --version)"
+
 mkdir -p $(dirname "${keystone_path}")
 
 if [ -d "${keystone_path}" ]; then
