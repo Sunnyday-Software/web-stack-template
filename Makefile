@@ -38,7 +38,7 @@ bash:
 	docker compose run --rm --no-deps nodejs bash
 
 up:
-	docker compose up -d nodejs pgadmin
+	docker compose up -d nodejs pgadmin s3 smtp
 
 down:
 	docker compose down -v --remove-orphans

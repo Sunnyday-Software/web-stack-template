@@ -20,7 +20,7 @@ services:
     environment:
       - HOST=0.0.0.0
     ports:
-      - "3000:3000"
+      - "8080:3000"
     command:
       - "/app/dev/scripts/run-keystone-project.sh"
     depends_on:
@@ -50,6 +50,28 @@ services:
       - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/servers.json:/pgadmin4/servers.json
       - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/pgpassfile:/pgpassfile
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - postgres
+
+  s3:
+    image: "bitnami/minio:latest"
+    environment:
+      - MINIO_DATA_DIR=/minio/path
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=password123
+    volumes:
+      - ${HOST_PROJECT_PATH}/.runtime/minio:/minio/path
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  smtp:
+    image: maildev/maildev:2.1.0
+    environment:
+      - MAILDEV_WEB_PORT=1080
+      - MAILDEV_SMTP_PORT=25
+    ports:
+      - "8082:1080"
+      - "25:25"
+

@@ -23,5 +23,6 @@ export default withAuth(
     },
     lists,
     session,
+    telemetry: false,
   })
 )
