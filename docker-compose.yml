@@ -9,7 +9,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:/app
 
-  nodejs:
+  keystone:
     image: keystone-nodejs:${MD5_NODEJS}
     build:
       context: ./dev/docker/nodejs
@@ -20,11 +20,28 @@ services:
     environment:
       - HOST=0.0.0.0
     ports:
-      - "8080:3000"
+      - "${keystone_port}:3000"
     command:
       - "/app/dev/scripts/run-keystone-project.sh"
     depends_on:
       - postgres
+
+  astro:
+    image: keystone-nodejs:${MD5_NODEJS}
+    build:
+      context: ./dev/docker/nodejs
+      dockerfile: Dockerfile
+    volumes:
+      - ${HOST_PROJECT_PATH}:/app
+      - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
+    environment:
+      - HOST=0.0.0.0
+    ports:
+      - "${astro_port}:4321"
+    command:
+      - "/app/dev/scripts/run-astro-project.sh"
+    depends_on:
+      - keystone
 
   postgres:
     image: keystone-postgres:${MD5_POSTGRES}
@@ -38,7 +55,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}/.runtime/pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${postgres_port}:5432"
 
   pgadmin:
     image: "dpage/pgadmin4:latest"
@@ -50,7 +67,7 @@ services:
       - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/servers.json:/pgadmin4/servers.json
       - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/pgpassfile:/pgpassfile
     ports:
-      - "8081:80"
+      - "${pgadmin_port}:80"
     depends_on:
       - postgres
 
@@ -63,7 +80,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}/.runtime/minio:/minio/path
     ports:
-      - "9000:9000"
+      - "${s3_port}:9000"
       - "9001:9001"
 
   smtp:
@@ -72,6 +89,6 @@ services:
       - MAILDEV_WEB_PORT=1080
       - MAILDEV_SMTP_PORT=25
     ports:
-      - "8082:1080"
+      - "${smtp_port}:1080"
       - "25:25"
 

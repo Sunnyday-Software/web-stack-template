@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-export keystone_version="latest"
-export keystone_path="/app/application/keystone/core"
+source "$(dirname "$0")/../../.env"
+
+export keystone_version
+export keystone_path
+
+export astro_version
+export astro_path
 
 export d_npm="docker compose run --rm --no-deps nodejs npm"
 

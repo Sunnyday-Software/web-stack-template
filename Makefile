@@ -32,13 +32,15 @@ help:
 
 init:
 	[ -f dev/scripts/create-keystone-project.sh ] && \
-	docker compose run --rm --no-deps nodejs dev/scripts/create-keystone-project.sh
+	docker compose run --rm --no-deps keystone dev/scripts/create-keystone-project.sh
+	[ -f dev/scripts/create-astro-project.sh ] && \
+    docker compose run --rm --no-deps astro dev/scripts/create-astro-project.sh
 
 bash:
-	docker compose run --rm --no-deps nodejs bash
+	docker compose run --rm --no-deps keystone bash
 
 up:
-	docker compose up -d nodejs pgadmin s3 smtp
+	docker compose up -d keystone astro pgadmin s3 smtp
 
 down:
 	docker compose down -v --remove-orphans
