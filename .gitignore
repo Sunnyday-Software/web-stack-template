@@ -1,5 +1,5 @@
 # Application's git exclusions
-/application/keystone/core/
+
 /.npm-cache/
 /.runtime/
 
