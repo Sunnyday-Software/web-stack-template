@@ -8,14 +8,22 @@ source "$(dirname "$0")/env.sh"
 check_container;
 
 echo "node version $(node --version)"
+echo "Astro project: ${astro_project_name}"
+astro_full_path="${astro_path}/${astro_project_name}"
 
-mkdir -p $(dirname "${astro_path}")
+mkdir -p $(dirname "${astro_full_path}")
 
-if [ -d "${astro_path}" ]; then
-  echo "La cartella ${astro_path} esiste perciò non invoco npm create app"
+if [ -d "${astro_full_path}" ]; then
+  echo "La cartella ${astro_full_path} esiste perciò non invoco npm create app"
 else
   echo "npm create app"
-  npm create astro@${astro_version} --yes ${astro_path}
+  cd "${astro_path}"
+  npm create astro@${astro_version} "${astro_project_name}" -- \
+    --template ${astro_template} \
+    --install \
+    --no-git \
+    --typescript strict \
+    --yes
 fi
 
 
@@ -33,9 +41,9 @@ copy_custom_files() {
 }
 
 if [ -d "$CUSTOM_FILES_DIR" ]; then
-    echo "Inizio la copia di tutti i file personalizzati da $CUSTOM_FILES_DIR a $astro_path"
+    echo "Inizio la copia di tutti i file personalizzati da $CUSTOM_FILES_DIR a $astro_full_path"
 
-    copy_custom_files "$CUSTOM_FILES_DIR" "$astro_path"
+    copy_custom_files "$CUSTOM_FILES_DIR" "$astro_full_path"
 
     echo "Copia completata."
 else
@@ -43,7 +51,7 @@ else
 fi
 
 
-cd ${astro_path}
+cd ${astro_full_path}
 
 jq \
 '
