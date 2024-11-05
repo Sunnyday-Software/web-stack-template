@@ -37,6 +37,7 @@ docker compose run ^
   -e MD5_MAKE="%MD5_MAKE%" ^
   -e MD5_NODEJS="%MD5_NODEJS%" ^
   -e MD5_POSTGRES="%MD5_POSTGRES%" ^
+  -e CHOKIDAR_USEPOLLING="true" ^
   make ^
   make %*
 
