@@ -10,7 +10,7 @@ endef
 
 # Imposta le variabili d'ambiente all'inizio
 $(eval $(call CALC_MD5))
-
+$(shell dos2unix .env)
 $(shell find ./dev/scripts -type f -name "*.sh" -exec chmod +x {} +)
 $(shell find ./dev/scripts -type f -name "*.sh" -exec dos2unix {} +)
 
