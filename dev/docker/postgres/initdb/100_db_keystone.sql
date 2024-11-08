@@ -1,0 +1,4 @@
+CREATE ROLE keystone WITH LOGIN PASSWORD 'password123';
+CREATE DATABASE keystone OWNER keystone;
+GRANT ALL PRIVILEGES ON DATABASE keystone TO keystone;
+

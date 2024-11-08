@@ -1,8 +1,8 @@
-name: keystone
+name: ${project_name}
 services:
 
   make:
-    image: keystone-make:${MD5_MAKE}
+    image: ${project_name}-make:${MD5_MAKE}
     build:
       context: ./dev/docker/make
       dockerfile: Dockerfile
@@ -10,7 +10,7 @@ services:
       - ${HOST_PROJECT_PATH}:/app
 
   keystone:
-    image: keystone-nodejs:${MD5_NODEJS}
+    image: ${project_name}-nodejs:${MD5_NODEJS}
     build:
       context: ./dev/docker/nodejs
       dockerfile: Dockerfile
@@ -27,7 +27,7 @@ services:
       - postgres
 
   astro:
-    image: keystone-nodejs:${MD5_NODEJS}
+    image: ${project_name}-nodejs:${MD5_NODEJS}
     build:
       context: ./dev/docker/nodejs
       dockerfile: Dockerfile
@@ -45,7 +45,7 @@ services:
       - keystone
 
   postgres:
-    image: keystone-postgres:${MD5_POSTGRES}
+    image: ${project_name}-postgres:${MD5_POSTGRES}
     build:
       context: ./dev/docker/postgres
       dockerfile: Dockerfile
@@ -57,6 +57,11 @@ services:
       - ${HOST_PROJECT_PATH}/.runtime/pgdata:/var/lib/postgresql/data
     ports:
       - "${postgres_port}:5432"
+    healthcheck:
+      test: "pg_isready --username=${POSTGRES_USER} && psql --username=${POSTGRES_USER} --list"
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   pgadmin:
     image: "dpage/pgadmin4:latest"
@@ -92,4 +97,14 @@ services:
     ports:
       - "${smtp_port}:1080"
       - "25:25"
+
+  cube:
+    image: cubejs/cube:latest
+    ports:
+      - 4000:4000
+      - 15432:15432
+    environment:
+      - CUBEJS_DEV_MODE=true
+    volumes:
+      - ${HOST_PROJECT_PATH}/.runtime/cube/conf:/cube/conf
 
