@@ -64,32 +64,19 @@ jobs:
         working-directory: dev/project
         run: cargo build --release
 
-      - name: List Files in target/release (Linux and macOS)
-        if: runner.os != 'Windows'
-        working-directory: dev/project
-        run: ls target/release
-
-      - name: List Files in target\release on Windows
-        if: runner.os == 'Windows'
-        working-directory: dev\project
-        shell: cmd
-        run: dir target\release
-
       - name: Archive Binaries on Linux
         if: runner.os == 'Linux'
         working-directory: dev/project
         run: |
-          mkdir -p artifacts
-          cp target/release/$PACKAGE_NAME artifacts/
-          tar -czvf artifacts/linux-binary.tar.gz -C artifacts $PACKAGE_NAME
+          tar -czvf $PACKAGE_NAME-linux.tar.gz -C target/release $PACKAGE_NAME
+          echo "ASSET_NAME=$PACKAGE_NAME-linux.tar.gz" >> $GITHUB_ENV
 
       - name: Archive Binaries on macOS
         if: runner.os == 'macOS'
         working-directory: dev/project
         run: |
-          mkdir -p artifacts
-          cp target/release/$PACKAGE_NAME artifacts/
-          tar -czvf artifacts/macos-binary.tar.gz -C artifacts $PACKAGE_NAME
+          tar -czvf $PACKAGE_NAME-macos.tar.gz -C target/release $PACKAGE_NAME
+          echo "ASSET_NAME=$PACKAGE_NAME-macos.tar.gz" >> $GITHUB_ENV
 
       - name: Archive Binaries on Windows
         if: runner.os == 'Windows'
@@ -98,9 +85,8 @@ jobs:
         env:
           PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
         run: |
-          mkdir artifacts
-          copy target\release\%PACKAGE_NAME%.exe artifacts\
-          powershell -Command "Compress-Archive -Path artifacts\%PACKAGE_NAME%.exe -DestinationPath artifacts\windows-binary.zip"
+          powershell -Command "Compress-Archive -Path target\release\%PACKAGE_NAME%.exe -DestinationPath %PACKAGE_NAME%-windows.zip"
+          echo "ASSET_NAME=%PACKAGE_NAME%-windows.zip" >> %GITHUB_ENV%
 
       - name: Create Release
         id: create_release
