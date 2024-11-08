@@ -81,9 +81,48 @@ jobs:
           powershell -Command "Compress-Archive -Path target\release\%PACKAGE_NAME%.exe -DestinationPath %PACKAGE_NAME%-windows.zip"
           echo "ASSET_NAME=%PACKAGE_NAME%-windows.zip" >> %GITHUB_ENV%
 
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dev/project/${{ env.ASSET_NAME }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dev/project/${{ env.ASSET_NAME }}
+          asset_name: ${{ env.ASSET_NAME }}
+          asset_content_type: application/octet-stream
+
+      - name: Delete Source Code Assets
+        uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const release_id = ${{ steps.create_release.outputs.id }};
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const assets = await github.rest.repos.listReleaseAssets({
+              owner,
+              repo,
+              release_id,
+            });
+            for (const asset of assets.data) {
+              if (asset.name.endsWith('.zip') || asset.name.endsWith('.tar.gz')) {
+                await github.rest.repos.deleteReleaseAsset({
+                  owner,
+                  repo,
+                  asset_id: asset.id,
+                });
+                console.log(`Deleted asset: ${asset.name}`);
+              }
+            }
