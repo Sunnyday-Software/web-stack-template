@@ -26,48 +26,76 @@ jobs:
           override: true
 
       - name: Install Dependencies on Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y pkg-config libssl-dev
+          sudo apt-get install -y pkg-config libssl-dev jq
 
       - name: Install Dependencies on macOS
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
         run: |
           brew update
-          brew install pkg-config openssl
+          brew install pkg-config openssl jq
+
+      - name: Install jq on Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          choco install jq -y
+
+      - name: Extract package name
+        id: extract-name
+        shell: bash
+        working-directory: dev/project
+        run: |
+          PACKAGE_NAME=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[0].name')
+          echo "Package name: $PACKAGE_NAME"
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
 
       - name: Build Project
         working-directory: dev/project
         run: cargo build --release
 
+      - name: List Files in target/release (Linux and macOS)
+        if: runner.os != 'Windows'
+        working-directory: dev/project
+        run: ls target/release
+
+      - name: List Files in target\release on Windows
+        if: runner.os == 'Windows'
+        working-directory: dev\project
+        shell: cmd
+        run: dir target\release
+
       - name: Archive Binaries on Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
+        working-directory: dev/project
         run: |
           mkdir -p artifacts
-          cp target/release/nome_del_tuo_programma artifacts/
-          tar -czvf artifacts/linux-binary.tar.gz -C artifacts nome_del_tuo_programma
+          cp target/release/$PACKAGE_NAME artifacts/
+          tar -czvf artifacts/linux-binary.tar.gz -C artifacts $PACKAGE_NAME
 
       - name: Archive Binaries on macOS
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
+        working-directory: dev/project
         run: |
           mkdir -p artifacts
-          cp target/release/nome_del_tuo_programma artifacts/
-          tar -czvf artifacts/macos-binary.tar.gz -C artifacts nome_del_tuo_programma
+          cp target/release/$PACKAGE_NAME artifacts/
+          tar -czvf artifacts/macos-binary.tar.gz -C artifacts $PACKAGE_NAME
 
       - name: Archive Binaries on Windows
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
+        working-directory: dev\project
+        shell: cmd
+        env:
+          PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
         run: |
           mkdir artifacts
-          copy target\release\nome_del_tuo_programma.exe artifacts\
-          powershell Compress-Archive -Path artifacts\nome_del_tuo_programma.exe -DestinationPath artifacts\windows-binary.zip
+          copy target\release\%PACKAGE_NAME%.exe artifacts\
+          powershell -Command "Compress-Archive -Path artifacts\%PACKAGE_NAME%.exe -DestinationPath artifacts\windows-binary.zip"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-binary
-          path: |
-            dev/project/artifacts/linux-binary.tar.gz
-            dev/project/artifacts/macos-binary.tar.gz
-            dev/project/artifacts/windows-binary.zip
-          if-no-files-found: error
+          name: ${{ runner.os }}-binary
+          path: dev/project/artifacts/**
