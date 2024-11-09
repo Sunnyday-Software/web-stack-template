@@ -1,43 +1,56 @@
 #!/bin/bash
 
-# Script per compilare il progetto Rust e spostare il binario nella directory radice
-set -e
+# Configura queste variabili con le informazioni del tuo repository
+OWNER="Sunnyday-Software"
+REPO="web-stack-template"
 
-# Funzione per verificare se un comando esiste
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
+# Determina il sistema operativo
+OS=""
+case "$(uname -s)" in
+    Linux*)
+        OS="linux"
+        ;;
+    Darwin*)
+        OS="macos"
+        ;;
+    CYGWIN*|MINGW32*|MSYS*|MINGW*)
+        OS="windows"
+        ;;
+    *)
+        echo "Sistema operativo non supportato."
+        exit 1
+        ;;
+esac
 
-# Verifica se Rust (cargo) è installato
-if ! command_exists cargo; then
-    echo "Errore: Rust non è installato. Per favore, installa Rust da https://www.rust-lang.org/tools/install"
+# Ottieni l'ultima release dall'API di GitHub
+API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/latest"
+ASSET_URL=$(curl -s $API_URL | grep "browser_download_url" | grep "$OS" | cut -d '"' -f 4)
+
+if [ -z "$ASSET_URL" ]; then
+    echo "Nessun asset trovato per il sistema operativo: $OS"
     exit 1
 fi
 
-cd ./dev/project
-cargo clean
-cargo update
-cargo build --release
+echo "Scaricamento dell'asset: $ASSET_URL"
 
-# Estrae il nome del pacchetto dal Cargo.toml
-PACKAGE_NAME=$(cargo metadata --format-version 1 --no-deps | sed -n 's/.*"name":"\([^"]*\)".*/\1/p' | head -n 1)
+# Nome dell'asset scaricato
+ASSET_NAME="$REPO-$OS-asset"
 
-# Verifica se il nome del pacchetto è stato estratto correttamente
-if [ -z "$PACKAGE_NAME" ]; then
-    echo "Errore: impossibile determinare il nome del pacchetto dal Cargo.toml"
-    exit 1
+# Scarica l'asset
+curl -L -o "$ASSET_NAME" "$ASSET_URL"
+
+# Estrae l'asset direttamente nella directory corrente
+if [ "$OS" = "windows" ]; then
+    # Per Windows, utilizziamo unzip (assicurati che sia installato)
+    unzip -j "$ASSET_NAME" -d .
+else
+    # Per Linux e macOS
+    tar -xzf "$ASSET_NAME" -C .
 fi
 
-# Percorso del binario compilato
-BINARY_PATH="target/release/$PACKAGE_NAME"
+# Rimuove l'archivio scaricato
+rm "$ASSET_NAME"
 
-# Verifica se il binario esiste
-if [ ! -f "$BINARY_PATH" ]; then
-    echo "Errore: il binario compilato non è stato trovato in $BINARY_PATH"
-    exit 1
-fi
+chmod +x ./project
 
-# Sposta il binario nella directory radice
-mv "$BINARY_PATH" ../..
-
-echo "Il binario '$PACKAGE_NAME' è stato compilato e spostato nella directory radice."
+echo "Download e estrazione completati. Il binario si trova nella directory corrente."
