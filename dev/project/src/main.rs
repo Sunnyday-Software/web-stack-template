@@ -91,6 +91,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Mapping dei volumi (adattato per compatibilità cross-platform)
     if cfg!(target_os = "windows") {
         // Su Windows, il socket Docker si gestisce diversamente o si omette
+        command.args(&["-v", "/var/run/docker.sock:/var/run/docker.sock"]);
     } else {
         command.args(&["-v", "/var/run/docker.sock:/var/run/docker.sock"]);
     }
