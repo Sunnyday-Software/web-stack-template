@@ -40,7 +40,7 @@ bash:
 	docker compose run --rm --no-deps keystone bash
 
 up:
-	docker compose up -d keystone astro pgadmin s3 smtp cube
+	docker compose up -d keystone astro pgadmin s3 smtp infisical-backend
 
 down:
 	docker compose down -v --remove-orphans
