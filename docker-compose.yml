@@ -98,46 +98,17 @@ services:
       - "${smtp_port}:1080"
       - "25:25"
 
-# infisical --------------------------------------------------------------------------
-# https://raw.githubusercontent.com/Infisical/infisical/main/docker-compose.prod.yml
-# ------------------------------------------------------------------------------------
-
-  infisical-db-migration:
-    container_name: infisical-db-migration
-    depends_on:
-      postgres:
-        condition: service_healthy
-    image: infisical/infisical:latest-postgres
-    env_file: .env
-    command: npm run migration:latest
-    pull_policy: always
-
-  infisical-backend:
-    container_name: infisical-backend
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      infisical-redis:
-        condition: service_started
-      infisical-db-migration:
-        condition: service_completed_successfully
-    image: infisical/infisical:latest-postgres
-    pull_policy: always
-    env_file: .env
+  vault:
+    image: vault:latest
     ports:
-      - ${infisical_port}:8080
+      - "${vault_port}:8200"
     environment:
-      - NODE_ENV=production
-
-  infisical-redis:
-    image: redis
-    container_name: infisical-dev-redis
-    env_file: .env
-    restart: always
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    ports:
-      - 6379:6379
+      VAULT_ADDR: "http://0.0.0.0:8200"
     volumes:
-      - ${HOST_PROJECT_PATH}/.runtime/infisical_redis_data:/data
+      - ./vault/config:/vault/config
+    cap_add:
+      - IPC_LOCK
+    command: vault server -config=/vault/config/vault-config.hcl
+    depends_on:
+      postgres:
+        condition: service_healthy

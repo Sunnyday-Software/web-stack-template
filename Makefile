@@ -17,7 +17,7 @@ $(shell find ./dev/scripts -type f -name "*.sh" -exec dos2unix {} +)
 # Definire una variabile di aiuto che elenca i target e le loro descrizioni
 HELP_TARGETS = "\n Available tasks:\n"
 HELP_TARGETS += "\n help			- Mostra questo messaggio"
-HELP_TARGETS += "\n init     		- Inizializza il progetto keystone"
+HELP_TARGETS += "\n init     		- Inizializza i progetti dello stack"
 HELP_TARGETS += "\n up      		- Avvia il progetto "
 HELP_TARGETS += "\n down      		- Ferma il progetto "
 HELP_TARGETS += "\n hard-reset 		- Ripulisce il progetto cancellando tutto quello che non è in git (db compreso)"
@@ -40,10 +40,11 @@ bash:
 	docker compose run --rm --no-deps keystone bash
 
 up:
-	docker compose up -d keystone astro pgadmin s3 smtp infisical-backend
+	docker compose up -d keystone astro pgadmin s3 smtp vault
 
 down:
-	docker compose down -v --remove-orphans
+	docker compose stop --timeout 30
+	docker compose down -v --timeout 30 --remove-orphans
 
 hard-reset:
 	git reset --hard
