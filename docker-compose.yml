@@ -9,6 +9,17 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:/app
 
+  nodejs:
+    image: ${project_name}-nodejs:${MD5_NODEJS}
+    build:
+      context: ./dev/docker/nodejs
+      dockerfile: Dockerfile
+    volumes:
+      - ${HOST_PROJECT_PATH}:/app
+      - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
+    environment:
+      - HOST=0.0.0.0
+
   keystone:
     image: ${project_name}-nodejs:${MD5_NODEJS}
     build:
@@ -51,8 +62,8 @@ services:
       dockerfile: Dockerfile
     shm_size: 128mb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
     volumes:
       - ${HOST_PROJECT_PATH}/.runtime/pgdata:/var/lib/postgresql/data
     ports:
@@ -64,14 +75,13 @@ services:
       retries: 10
 
   pgadmin:
-    image: "dpage/pgadmin4:latest"
+    image: "dpage/pgadmin4:${MD5_PGADMIN}"
     environment:
-      PGADMIN_DEFAULT_EMAIL: "info@sunnyday.software"
-      PGADMIN_DEFAULT_PASSWORD: "password123"
+      - PGADMIN_DEFAULT_EMAIL
+      - PGADMIN_DEFAULT_PASSWORD
     volumes:
       - ${HOST_PROJECT_PATH}/.runtime/pgadmin:/var/lib/pgadmin
       - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/servers.json:/pgadmin4/servers.json
-      - ${HOST_PROJECT_PATH}/dev/docker/pgadmin/data/pgpassfile:/pgpassfile
     ports:
       - "${pgadmin_port}:80"
     depends_on:
@@ -81,8 +91,8 @@ services:
     image: "bitnami/minio:latest"
     environment:
       - MINIO_DATA_DIR=/minio/path
-      - MINIO_ROOT_USER=root
-      - MINIO_ROOT_PASSWORD=password123
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
     volumes:
       - ${HOST_PROJECT_PATH}/.runtime/minio:/minio/path
     ports:
@@ -99,13 +109,13 @@ services:
       - "25:25"
 
   vault:
-    image: vault:latest
+    image: hashicorp/vault:1.18
     ports:
       - "${vault_port}:8200"
     environment:
       VAULT_ADDR: "http://0.0.0.0:8200"
     volumes:
-      - ./vault/config:/vault/config
+      - ${HOST_PROJECT_PATH}/.runtime/vault/config:/vault/config
     cap_add:
       - IPC_LOCK
     command: vault server -config=/vault/config/vault-config.hcl

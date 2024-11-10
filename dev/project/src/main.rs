@@ -67,6 +67,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("MD5_MAKE", "./dev/docker/make"),
         ("MD5_NODEJS", "./dev/docker/nodejs"),
         ("MD5_POSTGRES", "./dev/docker/postgres"),
+        ("MD5_PGADMIN", "./dev/docker/pgadmin"),
     ]);
 
     // HashMap per conservare le variabili d'ambiente da passare al comando Docker
