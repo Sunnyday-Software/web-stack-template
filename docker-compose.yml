@@ -75,7 +75,10 @@ services:
       retries: 10
 
   pgadmin:
-    image: "dpage/pgadmin4:${MD5_PGADMIN}"
+    image: ${project_name}-pgadmin:${MD5_PGADMIN}
+    build:
+      context: ./dev/docker/pgadmin
+      dockerfile: Dockerfile
     environment:
       - PGADMIN_DEFAULT_EMAIL
       - PGADMIN_DEFAULT_PASSWORD

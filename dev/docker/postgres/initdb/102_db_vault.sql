@@ -25,3 +25,14 @@ CREATE TABLE vault_ha_locks (
     valid_until                                 TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT ha_key PRIMARY KEY (ha_key)
 );
+
+GRANT USAGE ON SCHEMA public TO vault;
+
+-- Concedere permessi sulle tabelle esistenti
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO vault;
+
+-- Concedere permessi sulle sequenze
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO vault;
+
+-- Impostare permessi predefiniti per le tabelle future
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO vault;
