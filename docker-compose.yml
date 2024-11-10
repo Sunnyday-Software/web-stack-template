@@ -20,41 +20,6 @@ services:
     environment:
       - HOST=0.0.0.0
 
-  keystone:
-    image: ${project_name}-nodejs:${MD5_NODEJS}
-    build:
-      context: ./dev/docker/nodejs
-      dockerfile: Dockerfile
-    volumes:
-      - ${HOST_PROJECT_PATH}:/app
-      - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
-    environment:
-      - HOST=0.0.0.0
-    ports:
-      - "${keystone_port}:3000"
-    command:
-      - "/app/dev/scripts/run-keystone-project.sh"
-    depends_on:
-      - postgres
-
-  astro:
-    image: ${project_name}-nodejs:${MD5_NODEJS}
-    build:
-      context: ./dev/docker/nodejs
-      dockerfile: Dockerfile
-    volumes:
-      - ${HOST_PROJECT_PATH}:/app
-      - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
-    environment:
-      - HOST=0.0.0.0
-      - CHOKIDAR_USEPOLLING
-    ports:
-      - "${astro_port}:4321"
-    command:
-      - "/app/dev/scripts/run-astro-project.sh"
-    depends_on:
-      - keystone
-
   postgres:
     image: ${project_name}-postgres:${MD5_POSTGRES}
     build:
@@ -74,6 +39,43 @@ services:
       timeout: 10s
       retries: 10
 
+  keystone:
+    image: ${project_name}-nodejs:${MD5_NODEJS}
+    build:
+      context: ./dev/docker/nodejs
+      dockerfile: Dockerfile
+    volumes:
+      - ${HOST_PROJECT_PATH}:/app
+      - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
+    environment:
+      - HOST=0.0.0.0
+    ports:
+      - "${keystone_port}:3000"
+    command:
+      - "/app/dev/scripts/run-keystone-project.sh"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  astro:
+    image: ${project_name}-nodejs:${MD5_NODEJS}
+    build:
+      context: ./dev/docker/nodejs
+      dockerfile: Dockerfile
+    volumes:
+      - ${HOST_PROJECT_PATH}:/app
+      - ${HOST_PROJECT_PATH}/.npm-cache:/var/npm-cache
+    environment:
+      - HOST=0.0.0.0
+      - CHOKIDAR_USEPOLLING
+    ports:
+      - "${astro_port}:4321"
+    command:
+      - "/app/dev/scripts/run-astro-project.sh"
+    depends_on:
+      - keystone
+
+
   pgadmin:
     image: ${project_name}-pgadmin:${MD5_PGADMIN}
     build:
@@ -88,7 +90,8 @@ services:
     ports:
       - "${pgadmin_port}:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   s3:
     image: "bitnami/minio:latest"
@@ -116,9 +119,12 @@ services:
     ports:
       - "${vault_port}:8200"
     environment:
-      VAULT_ADDR: "http://0.0.0.0:8200"
+      - VAULT_ADDR
     volumes:
       - ${HOST_PROJECT_PATH}/.runtime/vault/config:/vault/config
+      - ${HOST_PROJECT_PATH}/.runtime/vault/file:/vault/file
+      - ${HOST_PROJECT_PATH}/.runtime/vault/logs:/vault/logs
+      - ${HOST_PROJECT_PATH}/.runtime/vault/data:/vault/data
     cap_add:
       - IPC_LOCK
     command: vault server -config=/vault/config/vault-config.hcl

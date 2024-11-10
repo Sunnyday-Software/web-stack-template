@@ -53,8 +53,8 @@ up:
 down:
 	@[ -f dev/scripts/pre-down.sh ] && \
 	docker compose run --rm --no-deps nodejs dev/scripts/pre-down.sh
-	@docker compose stop --timeout 30
-	@docker compose down -v --timeout 30 --remove-orphans
+	@docker compose stop
+	@docker compose down -v  --remove-orphans
 	@[ -f dev/scripts/post-down.sh ] && \
 	docker compose run --rm --no-deps nodejs dev/scripts/post-down.sh
 
