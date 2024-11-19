@@ -1,15 +1,27 @@
 FROM ubuntu:noble
 
+ENV USER=sunnyday
+ENV GROUP=sunnyday
+
+# explicitly set user/group IDs
+RUN set -eux; \
+    groupadd -r $GROUP --gid=999; \
+    useradd -r -g $GROUP --uid=999 $USER
+
 RUN apt-get update -y; \
     apt-get install -y --no-install-recommends \
+    ca-certificates \
+    dumb-init \
+    gosu \
+    tzdata \
+    jq \
     bash \
     openssl \
-    jq \
     rsync \
     dos2unix \
     curl \
-    ca-certificates \
     gnupg \
+    screen \
     ;
 
 RUN mkdir -p /etc/apt/keyrings;
@@ -33,7 +45,12 @@ EXPOSE 3000
 
 WORKDIR /app
 
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN dos2unix /usr/local/bin/*.sh ; \
+    chmod +x /usr/local/bin/*.sh;
+
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Imposta l'entrypoint per eseguire lo script passato come parametro
-ENTRYPOINT ["bash", "-c"]
 CMD ["echo 'Nessuno script specificato.'"]
+
