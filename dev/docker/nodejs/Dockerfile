@@ -6,7 +6,8 @@ ENV GROUP=sunnyday
 # explicitly set user/group IDs
 RUN set -eux; \
     groupadd -r $GROUP --gid=999; \
-    useradd -r -g $GROUP --uid=999 $USER
+    useradd -r -g $GROUP --uid=999 --home-dir=/var/lib/$USER --shell=/bin/bash $USER; \
+    install --verbose --directory --owner $USER --group $GROUP --mode 1777 /var/lib/$USER
 
 RUN apt-get update -y; \
     apt-get install -y --no-install-recommends \
