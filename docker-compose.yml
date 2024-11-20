@@ -53,6 +53,26 @@ services:
       - "${keystone_port}:3000"
     command:
       - "/app/dev/scripts/run-keystone-project.sh"
+    restart: unless-stopped
+    healthcheck:
+      test: >
+        node -e "
+          require('http').get('http://localhost:3000', (res) => {
+            //302 perché propone un redirect alla pagina di login
+            if (res.statusCode !== 302) {
+              console.error('Status code:', res.statusCode);
+              process.exit(1);
+            }
+            res.on('data', () => {}); // Consuma i dati se necessario
+            res.on('end', () => process.exit(0));
+          }).on('error', (err) => {
+            console.error('Error:', err.message);
+            process.exit(1);
+          });
+        "
+      timeout: 5s
+      interval: 5s
+      retries: 15
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,8 +92,27 @@ services:
       - "${astro_port}:4321"
     command:
       - "/app/dev/scripts/run-astro-project.sh"
+    healthcheck:
+      test: >
+        node -e "
+          require('http').get('http://localhost:4321', (res) => {
+            if (res.statusCode !== 200) {
+              console.error('Status code:', res.statusCode);
+              process.exit(1);
+            }
+            res.on('data', () => {}); // Consuma i dati se necessario
+            res.on('end', () => process.exit(0));
+          }).on('error', (err) => {
+            console.error('Error:', err.message);
+            process.exit(1);
+          });
+        "
+      timeout: 5s
+      interval: 5s
+      retries: 15
     depends_on:
-      - keystone
+      keystone:
+        condition: service_healthy
 
 
   pgadmin:
