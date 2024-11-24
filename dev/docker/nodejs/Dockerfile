@@ -21,6 +21,7 @@ RUN apt-get update -y; \
     dumb-init \
     gosu \
     tzdata \
+    locales \
     jq \
     bash \
     openssl \
@@ -31,10 +32,11 @@ RUN apt-get update -y; \
     screen \
     ;
 
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
-    && locale-gen \
-    && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && dpkg-reconfigure tzdata \
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen; \
+    locale-gen; \
+    ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime; \
+    dpkg-reconfigure tzdata; \
+    dpkg-reconfigure locales
 
 # installa nodejs as per https://github.com/nodesource/distributions?tab=readme-ov-file
 # Le librerie di canvas danno errore con node 22,

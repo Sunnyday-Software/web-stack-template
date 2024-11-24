@@ -60,3 +60,4 @@ jq \
 npm install
 npm run telemetry_disable
 
+npx next telemetry disable
