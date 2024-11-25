@@ -62,13 +62,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let host_project_path = env::current_dir()?;
     let host_project_path_str = host_project_path.to_str().ok_or("Percorso non valido")?;
 
+    let docker_dev_path = Path::new("./dev/docker");
+
+    // Verifica che il percorso sia una directory
+    if !docker_dev_path.is_dir() {
+        eprintln!("Errore: '{}' non è una directory valida o non esiste.", docker_dev_path.display());
+        return Err("Directory non valida".into());
+    }
+
     // Mappa delle directory e delle rispettive variabili d'ambiente
-    let dir_env_map = HashMap::from([
-        ("MD5_MAKE", "./dev/docker/make"),
-        ("MD5_NODEJS", "./dev/docker/nodejs"),
-        ("MD5_POSTGRES", "./dev/docker/postgres"),
-        ("MD5_PGADMIN", "./dev/docker/pgadmin"),
-    ]);
+    let mut dir_env_map = HashMap::new();
+
+    for entry in docker_dev_path.read_dir()? {
+        if let Ok(entry) = entry {
+            if entry.file_type()?.is_dir() {
+                if let Some(subdir_name) = entry.file_name().to_str() {
+                    let env_var = format!("MD5_{}", subdir_name.to_uppercase());
+                    let dir_path = entry.path().to_str().unwrap().to_string();
+                    dir_env_map.insert(env_var, dir_path);
+                }
+            }
+        }
+    }
 
     // HashMap per conservare le variabili d'ambiente da passare al comando Docker
     let mut env_vars = HashMap::new();
